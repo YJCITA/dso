@@ -62,15 +62,11 @@ int FrameHessian::instanceCounter=0;
 int PointHessian::instanceCounter=0;
 int CalibHessian::instanceCounter=0;
 
-
-
 FullSystem::FullSystem()
 {
-
 	int retstat =0;
 	if(setting_logStuff)
 	{
-
 		retstat += system("rm -rf logs");
 		retstat += system("mkdir logs");
 
@@ -127,11 +123,7 @@ FullSystem::FullSystem()
 	}
 
 	assert(retstat!=293847);
-
-
-
 	selectionMap = new float[wG[0]*hG[0]];
-
 	coarseDistanceMap = new CoarseDistanceMap(wG[0], hG[0]);
 	coarseTracker = new CoarseTracker(wG[0], hG[0]);
 	coarseTracker_forNewKF = new CoarseTracker(wG[0], hG[0]);
@@ -151,23 +143,17 @@ FullSystem::FullSystem()
 
 	currentMinActDist=2;
 	initialized=false;
-
-
 	ef = new EnergyFunctional();
 	ef->red = &this->treadReduce;
 
 	isLost=false;
 	initFailed=false;
 
-
 	needNewKFAfter = -1;
-
 	linearizeOperation=true;
 	runMapping=true;
 	mappingThread = boost::thread(&FullSystem::mappingLoop, this);
 	lastRefStopID=0;
-
-
 
 	minIdJetVisDebug = -1;
 	maxIdJetVisDebug = -1;

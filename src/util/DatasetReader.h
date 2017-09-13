@@ -107,71 +107,55 @@ public:
 		this->path = path;
 		this->calibfile = calibFile;
 
-#if HAS_ZIPLIB
+	#if HAS_ZIPLIB
 		ziparchive=0;
 		databuffer=0;
-#endif
-
+	#endif
 		isZipped = (path.length()>4 && path.substr(path.length()-4) == ".zip");
-
-
-
-
-
-		if(isZipped)
-		{
-#if HAS_ZIPLIB
+		if(isZipped){
+		#if HAS_ZIPLIB
 			int ziperror=0;
 			ziparchive = zip_open(path.c_str(),  ZIP_RDONLY, &ziperror);
-			if(ziperror!=0)
-			{
+			if(ziperror!=0){
 				printf("ERROR %d reading archive %s!\n", ziperror, path.c_str());
 				exit(1);
 			}
 
 			files.clear();
 			int numEntries = zip_get_num_entries(ziparchive, 0);
-			for(int k=0;k<numEntries;k++)
-			{
+			for(int k=0;k<numEntries;k++){
 				const char* name = zip_get_name(ziparchive, k,  ZIP_FL_ENC_STRICT);
 				std::string nstr = std::string(name);
-				if(nstr == "." || nstr == "..") continue;
+				if(nstr == "." || nstr == "..") 
+					continue;
 				files.push_back(name);
 			}
 
 			printf("got %d entries and %d files!\n", numEntries, (int)files.size());
 			std::sort(files.begin(), files.end());
-#else
+		#else
 			printf("ERROR: cannot read .zip archive, as compile without ziplib!\n");
 			exit(1);
-#endif
-		}
-		else
+		#endif
+		}else
 			getdir (path, files);
 
-
 		undistort = Undistort::getUndistorterForFile(calibFile, gammaFile, vignetteFile);
-
-
 		widthOrg = undistort->getOriginalSize()[0];
 		heightOrg = undistort->getOriginalSize()[1];
 		width=undistort->getSize()[0];
 		height=undistort->getSize()[1];
-
-
 		// load timestamps if possible.
 		loadTimestamps();
 		printf("ImageFolderReader: got %d files in %s!\n", (int)files.size(), path.c_str());
-
 	}
+	
 	~ImageFolderReader()
 	{
-#if HAS_ZIPLIB
+	#if HAS_ZIPLIB
 		if(ziparchive!=0) zip_close(ziparchive);
 		if(databuffer!=0) delete databuffer;
-#endif
-
-
+	#endif
 		delete undistort;
 	};
 
@@ -179,6 +163,7 @@ public:
 	{
 		return undistort->getOriginalParameter().cast<float>();
 	}
+	
 	Eigen::Vector2i getOriginalDimensions()
 	{
 		return  undistort->getOriginalSize();
@@ -244,20 +229,16 @@ private:
 
 	MinimalImageB* getImageRaw_internal(int id, int unused)
 	{
-		if(!isZipped)
-		{
+		if(!isZipped){
 			// CHANGE FOR ZIP FILE
 			return IOWrap::readImageBW_8U(files[id]);
-		}
-		else
-		{
+		}else{
 #if HAS_ZIPLIB
 			if(databuffer==0) databuffer = new char[widthOrg*heightOrg*6+10000];
 			zip_file_t* fle = zip_fopen(ziparchive, files[id].c_str(), 0);
 			long readbytes = zip_fread(fle, databuffer, (long)widthOrg*heightOrg*6+10000);
 
-			if(readbytes > (long)widthOrg*heightOrg*6)
-			{
+			if(readbytes > (long)widthOrg*heightOrg*6){
 				printf("read %ld/%ld bytes for file %s. increase buffer!!\n", readbytes,(long)widthOrg*heightOrg*6+10000, files[id].c_str());
 				delete[] databuffer;
 				databuffer = new char[(long)widthOrg*heightOrg*30];

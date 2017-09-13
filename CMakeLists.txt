@@ -15,20 +15,19 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 # required libraries
 find_package(SuiteParse REQUIRED)
 
-# -YJ- # 不可用
-#  SET(Eigen3 "/home/yj/bak/packet/Eigen/Eigen3.4_lib/share/eigen3/cmake/Eigen3Config.cmake") 
-#  find_package(Eigen3 REQUIRED)
-
-# 下面这个模式针对Eigen这种只包含头文件的可用
-include(/home/yj/bak/packet/Eigen/Eigen3.4_lib/share/eigen3/cmake/Eigen3Config.cmake REQUIRED)  # 添加Eigen3：linux和android都可以用
+include(/home/yj/bak/packet/eigen3_new/script_eigen.cmake) # eigen new
 MESSAGE(STATUS "EIGEN3_INCLUDE_DIR = ${EIGEN3_INCLUDE_DIR}")
 
 find_package(Boost COMPONENTS system thread) 
 
 # optional libraries
 find_package(LibZip QUIET)
+
+SET(Pangolin_DIR "/home/yj/bak/packet/Pangolin/install/lib/cmake/Pangolin")
 find_package(Pangolin 0.2 QUIET)
-find_package(OpenCV QUIET)
+
+SET(OpenCV_DIR "/home/yj/bak/packet/opencv/opencv3.1/install/share/OpenCV")
+FIND_PACKAGE(OpenCV 3 REQUIRED)
 
 # flags
 add_definitions("-DENABLE_SSE")
@@ -59,14 +58,11 @@ set(dso_SOURCE_FILES
   ${PROJECT_SOURCE_DIR}/src/util/globalCalib.cpp
 )
 
-
-
 include_directories(
   ${PROJECT_SOURCE_DIR}/src
   ${PROJECT_SOURCE_DIR}/thirdparty/Sophus
   ${EIGEN3_INCLUDE_DIR}
 ) 
-
 
 # decide if we have pangolin
 if (Pangolin_FOUND)
@@ -109,7 +105,6 @@ else()
 	message("--- not found ziplib (${LIBZIP_LIBRARY}), compiling without zip capability.")
 	set(LIBZIP_LIBRARY "")
 endif()
-
 
 # compile main library.
 include_directories( ${CSPARSE_INCLUDE_DIR} ${CHOLMOD_INCLUDE_DIR}) 
